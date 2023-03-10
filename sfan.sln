@@ -1,0 +1,16 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "sfan", "sfan.csproj", "{663989EB-793E-4389-B9E0-21EC38CD8668}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{663989EB-793E-4389-B9E0-21EC38CD8668}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{663989EB-793E-4389-B9E0-21EC38CD8668}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{663989EB-793E-4389-B9E0-21EC38CD8668}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{663989EB-793E-4389-B9E0-21EC38CD8668}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
