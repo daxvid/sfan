@@ -42,7 +42,7 @@ public class SfanClient : IDisposable
     {
         try
         {
-            Log.SaveException(err, driver);
+            Log.SaveException(err, driver,string.Empty);
         }
         catch
         {
@@ -85,13 +85,13 @@ public class SfanClient : IDisposable
         }
 
 
-        int zeroCount = 0;
+        var zeroCount = 0;
         DateTime heartbeatTime = DateTime.Now;
         while (true)
         {
-            var orders = LoadOrders();
+            var configs = LoadRecharge();
             //SendMsg("order count:" + orders.Count);
-            if (orders.Count > 0)
+            if (configs.Count > 0)
             {
                 zeroCount = 0;
                 // ReviewOrders(orders);
@@ -111,24 +111,20 @@ public class SfanClient : IDisposable
         }
     }
 
-    private List<int> LoadOrders()
+    private List<RechargeItem> LoadRecharge()
     {
-        // orderPage.Open();
-        // Thread.Sleep(10000);
-        // orderPage.Close();
-
         rechargePage.Open();
         Thread.Sleep(10000);
+        
+        
+        var items =  rechargePage.ReadData("");
 
-        var items = new string[] { "支付宝", "微信", "银行卡", "USDT", "银联", "数字人民币", "QQ钱包", "" };
-        for (int i = 0; i < items.Length; i++)
+        foreach (var key in new string[]{"支付宝","微信","银联","数字人民币","QQ钱包","" })
         {
-            rechargePage.Open();
-            Thread.Sleep(3000);
-            rechargePage.SetItem(i + 1, items[i]);
-            //rechargePage.Close();
+            Thread.Sleep(10000);
+            rechargePage.ReadData(key);
         }
 
-        return new List<int>();
+        return items;
     }
 }

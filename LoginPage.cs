@@ -20,12 +20,12 @@ public class LoginPage: PageBase
         // <input type="text" name="username" autofocus="" required="" id="id_username">
         // //input[@id="id_username"]
         
-        var namePath = "//input[@id='id_username' and @name='username']";
+        const string namePath = "//input[@id='id_username' and @name='username']";
         SetTextElementByXPath(namePath, authConfig.UserName);
 
         // <input type="password" name="password" required="" id="id_password">
         // //input[@id="id_password"]
-        var pwdPath = "//input[@id='id_password' and @name='password']";
+        const string pwdPath = "//input[@id='id_password' and @name='password']";
         SetTextElementByXPath(pwdPath, authConfig.Password);
         for (var i = 1; i < 1000; i++)
         {
@@ -43,7 +43,7 @@ public class LoginPage: PageBase
         // 登录按钮
         // <input type="submit" id="CheckTwoStep" data-url="/two_factor/verification/" value="登录">
         // //input[@id="CheckTwoStep"]
-        var path = "//input[@id='CheckTwoStep' and @type='submit']";
+        const string path = "//input[@id='CheckTwoStep' and @type='submit']";
         FindAndClickByXPath(path, 1000);
 
         try

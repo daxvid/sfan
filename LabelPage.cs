@@ -29,7 +29,7 @@ public class LabelPage : PageBase
         var className = li.GetAttribute("class");
         if (className == "el-submenu")
         {
-            var path = "./div/i[@class='el-submenu__icon-arrow el-icon-arrow-down']";
+            const string path = "./div/i[@class='el-submenu__icon-arrow el-icon-arrow-down']";
             FindAndClickByXPath(li, path, 100);
         }
 

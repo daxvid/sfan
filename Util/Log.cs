@@ -11,42 +11,55 @@ public class Log
 
     }
 
-    public static void SaveException(Exception e, ChromeDriver? driver = null)
+    public static void SaveException(Exception e, ChromeDriver? driver, string head)
     {
-        var msg = e.ToString();
-        string dir = Path.Join(Environment.CurrentDirectory, "log");
+        var dir = Path.Join(Environment.CurrentDirectory, "log");
         if (!Path.Exists(dir))
         {
             Directory.CreateDirectory(dir);
         }
 
-        string t = DateTime.Now.ToString("yyMMddHHmmssfff");
-        if (e != null)
-        {
-            if (e is WebDriverException)
-            {
-                Console.WriteLine(msg);
-                File.WriteAllText(Path.Join(dir, t + ".txt"), msg);
-            }
-            else
-            {
-                var st = e.StackTrace ?? string.Empty;
-                Console.WriteLine(msg);
-                Console.WriteLine(st);
-                File.WriteAllLines(Path.Join(dir, t + ".txt"), new string[] { msg, st });
-            }
-        }
+        var fileName = head + DateTime.Now.ToString("yyMMddHHmmssfff");
+        var fullName = Path.Join(dir, fileName + ".txt");
+        SaveException(e, head, fullName);
 
         if (driver != null)
         {
-            TakeScreenshot(driver, dir, t);
+            fullName = Path.Join(dir, fileName + ".png");
+            SaveScreenshot(driver, fullName);
         }
     }
 
-    public static void TakeScreenshot(ChromeDriver driver, string dir, string t)
+    private static void SaveException(Exception e, string head, string fullName)
     {
-        ITakesScreenshot ssdriver = driver as ITakesScreenshot;
-        Screenshot screenshot = ssdriver.GetScreenshot();
-        screenshot.SaveAsFile(Path.Join(dir, t + ".png"), ScreenshotImageFormat.Png);
+        var msg = e.ToString();
+        if (e is WebDriverException)
+        {
+            Console.WriteLine(msg);
+            File.WriteAllText(fullName, msg);
+        }
+        else
+        {
+            var st = e.StackTrace ?? string.Empty;
+            Console.WriteLine(head + msg);
+            Console.WriteLine(st);
+            if (e.InnerException != null)
+            {
+                File.WriteAllLines(fullName,
+                    new string[]
+                        { msg, st, e.InnerException.Message, e.InnerException.StackTrace ?? string.Empty });
+            }
+            else
+            {
+                File.WriteAllLines(fullName, new string[] { msg, st });
+            }
+        }
+    }
+
+    private static void SaveScreenshot(ChromeDriver driver, string fullName)
+    {
+        var drv = driver as ITakesScreenshot;
+        var screenshot = drv.GetScreenshot();
+        screenshot.SaveAsFile(fullName, ScreenshotImageFormat.Png);
     }
 }

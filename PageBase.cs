@@ -68,7 +68,7 @@ public class PageBase : IDisposable
 
     protected bool SetTextElement(IWebElement e, By by, string txt)
     {
-        var result = wait.Until(drv =>
+        var result = wait.Until(_ =>
         {
             try
             {
@@ -144,9 +144,9 @@ public class PageBase : IDisposable
 
     protected IWebElement FindElement(IWebElement e, By by)
     {
-        return wait.Until(drv => e.FindElement(by));
+        return wait.Until(_ => e.FindElement(by));
         IWebElement r = null;
-        var result = wait.Until(drv =>
+        var result = wait.Until(_ =>
         {
             try
             {
@@ -205,7 +205,7 @@ public class PageBase : IDisposable
 
     protected ReadOnlyCollection<IWebElement> FindElements(IWebElement e, By by)
     {
-        var result = wait.Until(drv => e.FindElements(by));
+        var result = wait.Until(_ => e.FindElements(by));
         return result;
     }
 
@@ -232,7 +232,7 @@ public class PageBase : IDisposable
 
     protected void FindAndClick(IWebElement e, By by, int ms)
     {
-        wait.Until(drv =>
+        wait.Until(_ =>
         {
             var btn = e.FindElement(by);
             btn.Click();
@@ -243,7 +243,7 @@ public class PageBase : IDisposable
 
     protected bool SafeClick(IWebElement btn, int ms = 0)
     {
-        return wait.Until(drv =>
+        return wait.Until(_ =>
         {
             try
             {

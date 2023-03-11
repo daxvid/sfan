@@ -44,7 +44,7 @@ public class TelegramBot
                 }
                 catch (Exception err)
                 {
-                    Log.SaveException(err);
+                    Log.SaveException(err, null, "bot_");
                     try
                     {
                         client.Close();

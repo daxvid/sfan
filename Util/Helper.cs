@@ -12,14 +12,13 @@ public class Helper
 {
     public static decimal GetDecimal(Dictionary<string, string> dic, string key)
     {
-        string value = GetValue(dic, key);
+        var value = GetValue(dic, key);
         if (string.IsNullOrEmpty(value))
         {
             return 0;
         }
 
-        decimal d = decimal.Parse(value);
-        //decimal.TryParse(value, out d);
+        var d = decimal.Parse(value);
         return d;
     }
 
@@ -32,31 +31,31 @@ public class Helper
     public static decimal ReadDecimal(Dictionary<string, string> head, string key,
         Dictionary<string, IWebElement> dicCell)
     {
-        string value = ReadString(head, key, dicCell);
-        decimal d;
-        decimal.TryParse(value, out d);
+        var value = ReadString(head, key, dicCell);
+        decimal.TryParse(value, out var d);
         return d;
     }
 
     public static DateTime ReadTime(Dictionary<string, string> head, string key,
         Dictionary<string, IWebElement> dicCell)
     {
-        string value = ReadString(head, key, dicCell);
-        DateTime d = DateTime.ParseExact(value, "yyyy-MM-dd HH:mm:ss", CultureInfo.CurrentCulture);
+        var value = ReadString(head, key, dicCell);
+        var d = DateTime.ParseExact(value, "yyyy-MM-dd HH:mm:ss", CultureInfo.CurrentCulture);
         return d;
     }
 
     public static string ReadString(Dictionary<string, string> head, string key,
         Dictionary<string, IWebElement> dicCell)
     {
-        if (head.TryGetValue(key, out string? className))
+        if (head.TryGetValue(key, out var className))
         {
-            if (dicCell.TryGetValue(className??string.Empty, out IWebElement? cell))
+            if (dicCell.TryGetValue(className, out var cell))
             {
-                var value = (cell!.Text??string.Empty).Trim();
+                var value = (cell.Text ?? string.Empty).Trim();
                 return value;
             }
         }
+
         return string.Empty;
     }
 
@@ -66,7 +65,7 @@ public class Helper
         Dictionary<string, IWebElement> row = new Dictionary<string, IWebElement>(tdList.Count * 2);
         foreach (var td in tdList)
         {
-            var key = td.GetAttribute("class")??string.Empty;
+            var key = td.GetAttribute("class") ?? string.Empty;
             row.Add(key, td);
         }
 
@@ -83,8 +82,8 @@ public class Helper
         et.SendKeys(Keys.Delete);
 
         var now = DateTime.Now;
-        string start = now.AddHours(-hour).ToString("yyyy-MM-dd HH:mm:ss");
-        string end = now.ToString("yyyy-MM-dd 23:59:59");
+        var start = now.AddHours(-hour).ToString("yyyy-MM-dd HH:mm:ss");
+        var end = now.ToString("yyyy-MM-dd 23:59:59");
         et.SendKeys(start + " - " + end);
         Thread.Sleep(10);
     }
@@ -99,8 +98,8 @@ public class Helper
         et.SendKeys(Keys.Delete);
 
         var now = DateTime.Now;
-        string start = now.AddDays(-(day - 1)).ToString("yyyy-MM-dd");
-        string end = now.ToString("yyyy-MM-dd");
+        var start = now.AddDays(-(day - 1)).ToString("yyyy-MM-dd");
+        var end = now.ToString("yyyy-MM-dd");
         et.SendKeys(start + " - " + end);
         Thread.Sleep(10);
     }
@@ -110,7 +109,7 @@ public class Helper
     {
         if (btn.Enabled)
         {
-            return wait.Until(driver =>
+            return wait.Until(_ =>
             {
                 try
                 {
@@ -134,24 +133,40 @@ public class Helper
     {
         var txt = e.Text;
         var index = txt.IndexOf('：');
-        txt = txt.Substring(index + 1);
-        decimal r;
-        decimal.TryParse(txt, out r);
+        txt = txt[(index + 1)..];
+        decimal.TryParse(txt, out var r);
+        return r;
+    }
+    
+    public static int ReadInt(IWebElement e)
+    {
+        var txt = ReadString(e);
+        var r = int.Parse(txt);
         return r;
     }
 
+    public static int ReadIntOrDefault(IWebElement e, int def = 0)
+    {
+        var txt = ReadString(e);
+        if (!int.TryParse(txt, out var r))
+        {
+            r = def;
+        }
+
+        return r;
+    }
+    
     public static decimal ReadDecimal(IWebElement e)
     {
         var txt = ReadString(e);
-        decimal r = decimal.Parse(txt);
+        var r = decimal.Parse(txt);
         return r;
     }
 
     public static decimal ReadDecimalOrDefault(IWebElement e, decimal def = 0)
     {
         var txt = ReadString(e);
-        decimal r;
-        if (!decimal.TryParse(txt, out r))
+        if (!decimal.TryParse(txt, out var r))
         {
             r = def;
         }
@@ -188,7 +203,7 @@ public class Helper
         var now = DateTime.Now;
         for (var year = now.Year; year >= 2022; year--)
         {
-            DateTime d = DateTime.ParseExact(year + "-" + str, "yyyy-MM-dd HH:mm:ss", CultureInfo.CurrentCulture);
+            var d = DateTime.ParseExact(year + "-" + str, "yyyy-MM-dd HH:mm:ss", CultureInfo.CurrentCulture);
             if (d < now)
             {
                 return d;
@@ -198,7 +213,7 @@ public class Helper
         return now;
     }
 
-    static readonly List<char> hexSet = new List<char>()
+    static readonly List<char> HexSet = new List<char>()
     {
         '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F', 'a', 'b', 'c', 'd', 'e', 'f'
     };
@@ -206,9 +221,9 @@ public class Helper
     // 判断十六进制字符串hex是否正确
     public static bool IsHexadecimal(string hex)
     {
-        foreach (char item in hex)
+        foreach (var item in hex)
         {
-            if (hexSet.Contains<char>(item) == false)
+            if (HexSet.Contains<char>(item) == false)
             {
                 return false;
             }
@@ -254,37 +269,41 @@ public class Helper
             {
                 if (i == 0 && err != null)
                 {
-                    Log.SaveException(err, driver);
+                    Log.SaveException(err, driver, "exec_");
                 }
+
                 i++;
             }
+
             Thread.Sleep(sleep);
         }
     }
 
-    public static string EncryptMD5(string s)
+    public static string EncryptMd5(string s)
     {
         var md5 = MD5.Create();
-        return BitConverter.ToString(md5.ComputeHash(Encoding.Default.GetBytes(s))).Replace("-","");
+        return BitConverter.ToString(md5.ComputeHash(Encoding.Default.GetBytes(s))).Replace("-", "");
     }
 
     public static string? GetJsonValue(string key, string content)
     {
-        string keyName = "\"" + key + "\"";
-        int index = content.IndexOf(keyName);
+        var keyName = "\"" + key + "\"";
+        var index = content.IndexOf(keyName, StringComparison.Ordinal);
         if (index > 0)
         {
             var i = index + keyName.Length;
-            int start = content.IndexOf("\"", i, content.Length - i);
+            var start = content.IndexOf("\"", i, content.Length - i, StringComparison.Ordinal);
             i = start + 1;
-            int end = content.IndexOf("\"", i, content.Length - i);
-            var name = content.Substring(start + 1, end - start - 1);
+            var end = content.IndexOf("\"", i, content.Length - i, StringComparison.Ordinal);
+            var name = content.Substring((start + 1),(end - start - 1));
             if (!string.IsNullOrEmpty(name))
             {
                 name = System.Text.RegularExpressions.Regex.Unescape(name);
             }
+
             return name;
         }
+
         return null;
     }
 
@@ -297,8 +316,7 @@ public class Helper
         }
 
         var len = name.Length;
-        var mask = new string('*', len-1);
+        var mask = new string('*', len - 1);
         return mask + name[len - 1];
     }
 }
-

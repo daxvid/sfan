@@ -5,7 +5,9 @@ using OpenQA.Selenium.Chrome;
 
 public class OrderPage : LabelPage
 {
-    public OrderPage(ChromeDriver driver, AppConfig config) : base(driver, config, 2, "tab-1002")
+    private const string FrameId = "1002";
+
+    public OrderPage(ChromeDriver driver, AppConfig config) : base(driver, config, 2, "tab-" + FrameId)
     {
         this.MaxPage = config.RechargeMaxPage;
     }
