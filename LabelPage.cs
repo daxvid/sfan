@@ -53,18 +53,7 @@ public class LabelPage : PageBase
         // 关闭窗口
         try
         {
-            wait.Until(drv =>
-            {
-                var btn = drv.FindElement(By.XPath(path));
-                if (btn.Enabled && btn.Displayed)
-                {
-                    btn.Click();
-                    Thread.Sleep(10);
-                    return true;
-                }
-
-                return false;
-            });
+            FindAndClickByXPath(path,10);
         }
         catch
         {

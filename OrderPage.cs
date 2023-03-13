@@ -9,6 +9,5 @@ public class OrderPage : LabelPage
 
     public OrderPage(ChromeDriver driver, AppConfig config) : base(driver, config, 2, "tab-" + FrameId)
     {
-        this.MaxPage = config.RechargeMaxPage;
     }
 }

@@ -1,31 +1,17 @@
 ﻿
-# 查询最近多少小时的订单
-OrderHour: 24
+# 最少下单数
+TotalMin: 6
 
-# 提现最多读取页数
-WithdrawMaxPage: 1
-# 提现最多天数
-WithdrawMaxDay: 3
+# 处理权重范围今天
+WeightsRang: [1,9999]
 
-# 充值最多读取页数
-RechargeMaxPage: 3
-# 充值最多天数
-RechargeMaxDay: 3
-
-# 游戏记录最多读取页数
-GameLogMaxPage: 3
-# 游戏记录最多小时
-GameLogMaxHour: 36
-
-# 最大锁定单数
-OrderMaxLock: 3
-
-# 处理金额范围
-AmountRang: [100,2000]
+# 处理的支付方式
+PayTypes: [支付宝, 微信, 数字人民币, QQ钱包]
 
 # 审核配置文件
 ReviewFile: review.yaml
 
 # Chrome
-Headless: false
+Headless: true
+WindowSize: 1600,1200
 

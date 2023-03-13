@@ -15,12 +15,16 @@ public class RechargeStatistics
     // 统计的时长（分钟）
     public int Duration { get; set; }
 
-    public decimal Rate => Total == 0 ? 100 : (Success / Total);
+    // 成功率
+    public decimal RateDecimal => Total == 0 ? 0 : (Success * 100 / Total);
+
+    public int Rate { get; set; }
 
     public static RechargeStatistics Parse(string value)
     {
         var r = new RechargeStatistics();
         var values = value.Split(new char[] { ' ', '/' }, StringSplitOptions.RemoveEmptyEntries);
+        r.Rate = int.Parse(values[0][..^1]);
         r.Success = int.Parse(values[1]);
         r.Total = int.Parse(values[2]);
 
@@ -37,7 +41,7 @@ public class RechargeStatistics
         return r;
     }
 
-    public static List<RechargeStatistics> ParseList(string value)
+    public static RechargeStatistics[] ParseList(string value)
     {
         var items = value.Split('，', StringSplitOptions.RemoveEmptyEntries);
         var rs = new List<RechargeStatistics>(items.Length);
@@ -46,11 +50,11 @@ public class RechargeStatistics
             rs.Add(Parse(item));
         }
 
-        return rs;
+        return rs.ToArray();
     }
 }
 
-public class RechargeItem
+public class RechargeItem : IComparable<RechargeItem>
 {
     // ID
     public int Id { get; set; }
@@ -74,20 +78,30 @@ public class RechargeItem
     private string Quota { get; set; } = string.Empty;
 
     // 代码
-    public string Code { get; set; }
+    public string Code { get; set; } = string.Empty;
 
     // 费率
     public decimal Rate { get; set; }
 
     // 成功率(48% 20/41 30m，55% 45/81 1h，51% 275/535 24h)
     private string SuccessRateStr { get; set; } = string.Empty;
-    
+
     // 总额
     public int Total { get; set; }
+
     // 余额
     public int Balance { get; set; }
+
+    public RechargeStatistics[] SuccessRates { get; set; } = new RechargeStatistics[] { };
+
+    // 所在页码
+    public int Page { get; set; }
     
-    public List<RechargeStatistics> SuccessRates { get; set; }
+    // 新的权重
+    public int NewWeights { get; set; }
+
+    // 同等级中费率排行
+    public int GradeRank { get; set; }
 
     private static readonly string[] Heads = new string[]
     {
@@ -103,13 +117,54 @@ public class RechargeItem
         SuccessRates = RechargeStatistics.ParseList(SuccessRateStr);
     }
 
+    // 成功率1-20%，权重1（等通道优化完毕，或过30分钟后加权重测试）
+    // 成功率20-30，权重100
+    // 成功率30-40，权重300
+    // 成功率40-50，权重500
+    // 成功率50以上，权重1000
+    private static int[] GradePowerList = new[] { 0, 1, 100, 300, 500, 1000 };
+
+    // 30-200   100-200  区间的金额   权重按之前说的来区分
+    // 500-1000 区间的金额 成功率在40-50以上给500权重，成功率在30-40给300权重，20-30给100权重，20-10权重给50，10以下给1权重
+    // 500-5000 还有  数字人民币 权重   40-50以上300权重，20-40权重100，20-10权重给50，10以下给1权重
+    
+    // 权重分为5个等级
+    public int Grade => (SuccessRates == null ? 0 : SuccessRates[0].Rate) switch
+    {
+        (>= 0 and <= 20) => 1,
+        (> 20 and <= 30) => 2,
+        (> 30 and <= 40) => 3,
+        (> 40 and <= 50) => 4,
+        (> 50) => 5,
+        _ => 0
+    };
+
+    public int CompareTo(RechargeItem that)
+    {
+        if (object.ReferenceEquals(this, that))
+        {
+            return 0;
+        }
+
+        // 先按等级排，再按费率排
+        var a = this.Grade;
+        var b = that.Grade;
+        var r = -a.CompareTo(b);
+        if (r == 0)
+        {
+            r = this.Rate.CompareTo(that.Rate);
+        }
+
+        return r;
+    }
+
     static int ReadInputInt(IWebElement e)
     {
-        var txt =  e.FindElement(By.XPath("./input")).GetAttribute("value");
+        var txt = e.FindElement(By.XPath("./input")).GetAttribute("value");
         var r = int.Parse(txt);
         return r;
     }
-    
+
     public static RechargeItem Create(IWebElement element)
     {
         using var span = new Span();
@@ -119,28 +174,20 @@ public class RechargeItem
             throw new ArgumentException("RechargeItem Create");
         }
 
-        RechargeItem log = new RechargeItem()
-        {
-        };
-        try
-        {
-            log.Id = Helper.ReadInt(ts[1]); // ֵIDֵ
-            log.Way = Helper.ReadString(ts[2]); //  通道
-            log.PayType = Helper.ReadString(ts[3]); // 支付方式
-            log.PayMin = ReadInputInt(ts[4]); // ֵ下限
-            log.PayMax = ReadInputInt(ts[5]); // 上限
-            log.Weights = ReadInputInt(ts[6]); // 权重
+        var log = new RechargeItem();
 
-            log.Quota = Helper.ReadString(ts[7]); // 限额（总额/余额）
-            log.Code = Helper.ReadString(ts[8]); // 代码
-            log.Rate = Helper.ReadDecimal(ts[9]); // 费率
-            log.SuccessRateStr = Helper.ReadString(ts[11]); // 成功率
-            log.init();
-        }
-        catch (Exception err)
-        {
-            Console.WriteLine(err);
-        }
+        log.Id = (int)(Helper.ReadDecimal(ts[1])); // ֵIDֵ
+        log.Way = Helper.ReadString(ts[2]); //  通道
+        log.PayType = Helper.ReadString(ts[3]); // 支付方式
+        log.PayMin = ReadInputInt(ts[4]); // ֵ下限
+        log.PayMax = ReadInputInt(ts[5]); // 上限
+        log.Weights = ReadInputInt(ts[6]); // 权重
+
+        log.Quota = Helper.ReadString(ts[7]); // 限额（总额/余额）
+        log.Code = Helper.ReadString(ts[8]); // 代码
+        log.Rate = Helper.ReadDecimal(ts[9]); // 费率
+        log.SuccessRateStr = Helper.ReadString(ts[11]); // 成功率
+        log.init();
 
         span.Msg = "记录:" + log.Id;
         return log;

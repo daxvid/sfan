@@ -1,11 +1,11 @@
-namespace Sfan.Util;
+﻿namespace Sfan.Util;
 
 using System.Globalization;
 using System.Security.Cryptography;
 using System.Text;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
-using OpenQA.Selenium.Support.UI;
+
 using Sfan.Bot;
 
 public class Helper
@@ -72,63 +72,6 @@ public class Helper
         return row;
     }
 
-    // 设置查询的时间范围
-    public static void SetTimeRang(IWebElement et, int hour)
-    {
-        et.Click();
-        et.SendKeys(Keys.Control + "a");
-        et.SendKeys(Keys.Delete);
-        et.SendKeys(Keys.Command + "a");
-        et.SendKeys(Keys.Delete);
-
-        var now = DateTime.Now;
-        var start = now.AddHours(-hour).ToString("yyyy-MM-dd HH:mm:ss");
-        var end = now.ToString("yyyy-MM-dd 23:59:59");
-        et.SendKeys(start + " - " + end);
-        Thread.Sleep(10);
-    }
-
-    // 设置查询的日期范围
-    public static void SetDayRang(IWebElement et, int day)
-    {
-        et.Click();
-        et.SendKeys(Keys.Control + "a");
-        et.SendKeys(Keys.Delete);
-        et.SendKeys(Keys.Command + "a");
-        et.SendKeys(Keys.Delete);
-
-        var now = DateTime.Now;
-        var start = now.AddDays(-(day - 1)).ToString("yyyy-MM-dd");
-        var end = now.ToString("yyyy-MM-dd");
-        et.SendKeys(start + " - " + end);
-        Thread.Sleep(10);
-    }
-
-
-    public static bool TryClick(WebDriverWait wait, IWebElement btn)
-    {
-        if (btn.Enabled)
-        {
-            return wait.Until(_ =>
-            {
-                try
-                {
-                    btn.Click();
-                    return true;
-                }
-                catch (WebDriverException)
-                {
-                }
-
-                return false;
-            });
-        }
-
-        return true;
-    }
-
-
-
     public static decimal ReadBetDecimal(IWebElement e)
     {
         var txt = e.Text;
@@ -137,25 +80,7 @@ public class Helper
         decimal.TryParse(txt, out var r);
         return r;
     }
-    
-    public static int ReadInt(IWebElement e)
-    {
-        var txt = ReadString(e);
-        var r = int.Parse(txt);
-        return r;
-    }
 
-    public static int ReadIntOrDefault(IWebElement e, int def = 0)
-    {
-        var txt = ReadString(e);
-        if (!int.TryParse(txt, out var r))
-        {
-            r = def;
-        }
-
-        return r;
-    }
-    
     public static decimal ReadDecimal(IWebElement e)
     {
         var txt = ReadString(e);
